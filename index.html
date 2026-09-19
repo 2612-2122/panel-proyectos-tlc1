@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #f0f2f5; font-family: system-ui, -apple-system, sans-serif; color: #1a1a2e; line-height: 1.5; padding: 20px; }
+ 
+  /* Header */
+  .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); color: white; border-radius: 12px; padding: 24px 28px; margin-bottom: 20px; display: flex; justify-content: s...
+  .header h1 { font-size: 22px; font-weight: 700; }
+  .header p { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+  .header-right { text-align: right; }
+  .header-date { font-size: 12px; opacity: 0.85; }
+ 
+  /* User selector */
+  .user-bar { background: #fff; border-radius: 10px; padding: 14px 20px; margin-bottom: 20px; border: 1px solid #e8e8e8; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .user-bar label { font-size: 13px; font-weight: 600; color: #444; }
+  .user-bar select { padding: 8px 12px; border-radius: 6px; border: 1px solid #ddd; font-size: 13px; background: #f9f9f9; cursor: pointer; }
+  .btn { padding: 8px 16px; border-radius: 6px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; }
+  .btn-primary { background: #0f3460; color: white; }
+  .btn-primary:hover { background: #1a4a7a; }
+  .btn-danger { background: #dc2626; color: white; font-size: 11px; padding: 4px 10px; }
+  .btn-danger:hover { background: #b91c1c; }
+  .btn-success { background: #15803d; color: white; font-size: 11px; padding: 4px 10px; }
+  .btn-success:hover { background: #116932; }
+  .btn-small { font-size: 11px; padding: 5px 12px; }
+  .btn-ghost { background: #f0f0f0; color: #444; }
+  .btn-ghost:hover { background: #e0e0e0; }
+ 
+  /* KPI Row */
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .kpi-card { background: #fff; border-radius: 10px; padding: 16px; border: 1px solid #e8e8e8; text-align: center; }
+  .kpi-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: #888; margin-bottom: 4px; }
+  .kpi-value { font-size: 28px; font-weight: 700; font-family: 'SF Mono', 'Consolas', monospace; }
+  .kpi-sub { font-size: 11px; color: #999; margin-top: 2px; }
+ 
+  /* Tabs */
+  .tabs-bar { display: flex; gap: 0; margin-bottom: 20px; background: #fff; border-radius: 10px; border: 1px solid #e8e8e8; overflow: hidden; }
+  .tab-btn { flex: 1; text-align: center; padding: 12px 8px; font-size: 12px; font-weight: 600; color: #666; cursor: pointer; border: none; background: none; border-bottom: 3px solid transparent; t...
+  .tab-btn:hover { background: #f5f7fa; }
+  .tab-btn.active { color: #0f3460; border-bottom-color: #0f3460; background: #f0f4ff; }
+ 
+  /* Form */
+  .form-card { background: #fff; border-radius: 10px; border: 1px solid #e8e8e8; padding: 20px; margin-bottom: 20px; display: none; }
+  .form-card.visible { display: block; }
+  .form-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 16px; color: #1a1a2e; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group label { font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.04em; }
+  .form-group input, .form-group select, .form-group textarea { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; font-family: inherit; }
+  .form-group textarea { resize: vertical; min-height: 60px; }
+  .form-actions { margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end; }
+ 
+  /* Project Cards */
+  .projects-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px; }
+  .project-card { background: #fff; border-radius: 10px; border: 1px solid #e8e8e8; overflow: hidden; transition: box-shadow 0.2s ease; }
+  .project-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+  .card-top { padding: 16px 20px 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .card-top h3 { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+  .badge { font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+  .badge-progress { background: #dbeafe; color: #1d4ed8; }
+  .badge-pending { background: #fef3c7; color: #92400e; }
+  .badge-done { background: #dcfce7; color: #15803d; }
+  .badge-blocked { background: #fee2e2; color: #dc2626; }
+  .card-body { padding: 0 20px 14px; }
+  .card-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 11px; color: #888; margin-bottom: 10px; }
+ 
+  /* Progress */
+  .progress-row { display: flex; justify-content: space-between; font-size: 11px; color: #666; margin-bottom: 4px; }
+  .progress-bar { height: 8px; background: #e8e8e8; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+  .fill-blue { background: linear-gradient(90deg, #3b82f6, #0f3460); }
+  .fill-green { background: linear-gradient(90deg, #22c55e, #15803d); }
+  .fill-amber { background: linear-gradient(90deg, #fbbf24, #d97706); }
+  .fill-red { background: linear-gradient(90deg, #f87171, #dc2626); }
+ 
+  /* Tasks */
+  .task-section { margin-top: 8px; }
+  .task-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #999; font-weight: 600; margin-bottom: 4px; }
+  .task-item { font-size: 12px; padding: 3px 0; display: flex; align-items: center; gap: 6px; color: #444; }
+  .task-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .dot-done { background: #22c55e; }
+  .dot-pending { background: #f59e0b; }
+  .dot-next { background: #3b82f6; }
+  .task-check { cursor: pointer; accent-color: #15803d; }
+ 
+  /* Card Footer */
+  .card-footer { padding: 10px 20px; background: #fafbfc; border-top: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #888; }
+  .avatar { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; }
+  .card-actions { display: flex; gap: 6px; }
+ 
+  /* Add task inline */
+  .add-task-row { display: flex; gap: 6px; margin-top: 6px; }
+  .add-task-row input { flex: 1; padding: 5px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; }
+  .add-task-row select { padding: 5px; border: 1px solid #ddd; border-radius: 4px; font-size: 11px; }
+  .add-task-btn { padding: 5px 10px; background: #0f3460; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer; }
+ 
+  /* Team View */
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .team-card { background: #fff; border-radius: 10px; border: 1px solid #e8e8e8; padding: 20px; text-align: center; }
+  .team-avatar { width: 50px; height: 50px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: white; margin-bottom: 1...
+  .team-card h4 { font-size: 14px; font-weight: 700; }
+  .team-role { font-size: 11px; color: #888; margin-bottom: 10px; }
+  .team-stats { display: flex; justify-content: center; gap: 16px; }
+  .t-stat-val { font-size: 18px; font-weight: 700; font-family: monospace; }
+  .t-stat-lbl { font-size: 9px; text-transform: uppercase; color: #999; }
+  .team-proj-list { text-align: left; margin-top: 12px; border-top: 1px solid #f0f0f0; padding-top: 10px; list-style: none; }
+  .team-proj-list li { font-size: 11px; padding: 3px 0; display: flex; justify-content: space-between; color: #444; }
+ 
+  .empty-state { text-align: center; padding: 40px; color: #999; font-size: 14px; }
+ 
+  /* Colors for avatars */
+  .av-0 { background: #3b82f6; } .av-1 { background: #ef4444; } .av-2 { background: #22c55e; }
+  .av-3 { background: #8b5cf6; } .av-4 { background: #f59e0b; } .av-5 { background: #ec4899; }
+  .av-6 { background: #14b8a6; } .av-7 { background: #f97316; }
+ 
+  .hidden { display: none; }
+ 
+  /* Continuation banner */
+  .continuation-banner { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 16px; margin-bottom: 12px; font-size: 12px; color: #1d4ed8; display: flex; align-items: ce...
+ 
+  /* Tooltip */
+  .info-tip { font-size: 11px; color: #888; font-style: italic; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+ 
+<div class="header">
+  <div>
+    <h1>📋 Proyectos Learning Trainer TLC1</h1>
+    <p>Gestión colaborativa · Seguimiento automático · Continuidad operativa</p>
+  </div>
+  <div class="header-right">
+    <div class="header-date">📅 <span id="currentDate"></span></div>
+  </div>
+</div>
+ 
+<!-- User Bar -->
+<div class="user-bar">
+  <label>👤 Sesión activa:</label>
+  <select id="activeUser">
+    <option value="">— Selecciona tu nombre —</option>
+  </select>
+  <button class="btn btn-primary" id="btnNewProject">＋ Nuevo Proyecto</button>
+  <button class="btn btn-ghost btn-small" id="btnManageTeam">⚙️ Equipo</button>
+</div>
+ 
+<!-- KPIs -->
+<div class="kpi-row" id="kpiRow"></div>
+ 
+<!-- Tabs -->
+<div class="tabs-bar" id="tabsBar">
+  <button class="tab-btn active" data-tab="all">🗂 Todos</button>
+  <button class="tab-btn" data-tab="progress">🔄 En Progreso</button>
+  <button class="tab-btn" data-tab="pending">⏳ Pendientes</button>
+  <button class="tab-btn" data-tab="done">✅ Completados</button>
+  <button class="tab-btn" data-tab="team">👥 Equipo</button>
+</div>
+ 
+<!-- New Project Form -->
+<div class="form-card" id="projectForm">
+  <h3>➕ Crear Nuevo Proyecto</h3>
+  <div class="form-grid">
+    <div class="form-group"><label>Nombre del Proyecto</label><input type="text" id="fName" placeholder="Ej: Capacitación PIT"></div>
+    <div class="form-group"><label>Responsable</label><select id="fOwner"></select></div>
+    <div class="form-group"><label>Fecha Inicio</label><input type="date" id="fStart"></div>
+    <div class="form-group"><label>Fecha Límite</label><input type="date" id="fEnd"></div>
+    <div class="form-group"><label>Estado</label>
+      <select id="fStatus">
+        <option value="progress">En Progreso</option>
+        <option value="pending">Pendiente</option>
+        <option value="blocked">Bloqueado</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Prioridad</label>
+      <select id="fPriority">
+        <option value="alta">Alta</option>
+        <option value="media">Media</option>
+        <option value="baja">Baja</option>
+      </select>
+    </div>
+    <div class="form-group full"><label>Descripción (opcional)</label><textarea id="fDesc" placeholder="Breve descripción del proyecto..."></textarea></div>
+  </div>
+  <div class="form-actions">
+    <button class="btn btn-ghost" id="btnCancelForm">Cancelar</button>
+    <button class="btn btn-primary" id="btnSaveProject">💾 Guardar Proyecto</button>
+  </div>
+</div>
+ 
+<!-- Team Management Form -->
+<div class="form-card" id="teamForm">
+  <h3>⚙️ Gestionar Equipo</h3>
+  <p class="info-tip">Agrega o elimina miembros del equipo. Los cambios se guardan automáticamente.</p>
+  <div style="display:flex;gap:8px;margin-bottom:12px;">
+    <input type="text" id="newMemberName" placeholder="Nombre completo" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
+    <input type="text" id="newMemberRole" placeholder="Rol (ej: Learning Trainer)" style="flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
+    <button class="btn btn-primary btn-small" id="btnAddMember">＋ Agregar</button>
+  </div>
+  <div id="membersList"></div>
+  <div class="form-actions"><button class="btn btn-ghost" id="btnCloseTeam">Cerrar</button></div>
+</div>
+ 
+<!-- Content Area -->
+<div id="contentArea"></div>
+ 
+<script>
+// ===== DATA LAYER =====
+const STORAGE_KEY = 'tlc1_projects_v3';
+const TEAM_KEY = 'tlc1_team_v3';
+ 
+const defaultTeam = [
+  { id: 't1', name: 'Esperanza Nieto', role: 'Learning Trainer', initials: 'EN' },
+  { id: 't2', name: 'Carlos Ramírez', role: 'Learning Trainer', initials: 'CR' },
+  { id: 't3', name: 'Laura Martínez', role: 'Learning Trainer', initials: 'LM' },
+  { id: 't4', name: 'Diana García', role: 'Learning Trainer', initials: 'DG' },
+  { id: 't5', name: 'Miguel Hernández', role: 'Learning Trainer', initials: 'MH' },
+  { id: 't6', name: 'Andrea Pérez', role: 'Learning Trainer', initials: 'AP' }
+];
+ 
+const defaultProjects = [
+  {
+    id: 'p1', name: 'Capacitación PIT para nuevos ingresos', owner: 't1', start: '2026-09-01', end: '2026-09-30',
+    status: 'progress', priority: 'alta', desc: 'Certificación PIT para AAs de nuevo ingreso',
+    tasks: [
+      { id: 'tk1', text: 'Identificar AAs que requieren certificación', type: 'done', doneBy: 't1', doneDate: '2026-09-05' },
+      { id: 'tk2', text: 'Coordinar horarios con operaciones', type: 'done', doneBy: 't1', doneDate: '2026-09-08' },
+      { id: 'tk3', text: 'Completar sesiones prácticas (faltan 8 AAs)', type: 'pending' },
+      { id: 'tk4', text: 'Evaluación final de competencias', type: 'pending' },
+      { id: 'tk5', text: 'Programar examen teórico semana 39', type: 'next' }
+    ],
+    log: [{ date: '2026-09-05', user: 't1', action: 'Proyecto creado' }]
+  },
+  {
+    id: 'p2', name: 'Implementación Safety Dojo Q4', owner: 't2', start: '2026-09-05', end: '2026-10-15',
+    status: 'progress', priority: 'alta', desc: 'Dojo de seguridad para Q4',
+    tasks: [
+      { id: 'tk6', text: 'Diseño del layout del Dojo', type: 'done', doneBy: 't2', doneDate: '2026-09-10' },
+      { id: 'tk7', text: 'Aprobación de materiales con EHS', type: 'done', doneBy: 't2', doneDate: '2026-09-12' },
+      { id: 'tk8', text: 'Instalación de estaciones prácticas', type: 'pending' },
+      { id: 'tk9', text: 'Crear calendario de rotación por turno', type: 'pending' },
+      { id: 'tk10', text: 'Piloto con turno DA semana 40', type: 'next' }
+    ],
+    log: [{ date: '2026-09-05', user: 't2', action: 'Proyecto creado' }]
+  },
+  {
+    id: 'p3', name: 'Cross-Training Pick & Pack', owner: 't3', start: '2026-08-25', end: '2026-09-15',
+    status: 'done', priority: 'media', desc: 'Entrenamiento cruzado completado',
+    tasks: [
+      { id: 'tk11', text: '15 AAs certificados en Pick', type: 'done', doneBy: 't3', doneDate: '2026-09-10' },
+      { id: 'tk12', text: '12 AAs certificados en Pack', type: 'done', doneBy: 't3', doneDate: '2026-09-12' },
+      { id: 'tk13', text: 'Registro actualizado en Knet', type: 'done', doneBy: 't3', doneDate: '2026-09-14' },
+      { id: 'tk14', text: 'Reporte enviado a Sr. Ops Manager', type: 'done', doneBy: 't3', doneDate: '2026-09-14' }
+    ],
+    log: [{ date: '2026-08-25', user: 't3', action: 'Proyecto creado' }, { date: '2026-09-14', user: 't3', action: 'Proyecto completado' }]
+  }
+];
+ 
+function loadTeam() {
+  const d = localStorage.getItem(TEAM_KEY);
+  return d ? JSON.parse(d) : defaultTeam;
+}
+function saveTeam(t) { localStorage.setItem(TEAM_KEY, JSON.stringify(t)); }
+function loadProjects() {
+  const d = localStorage.getItem(STORAGE_KEY);
+  return d ? JSON.parse(d) : defaultProjects;
+}
+function saveProjects(p) { localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+ 
+let team = loadTeam();
+let projects = loadProjects();
+let currentTab = 'all';
+let editingProject = null;
+ 
+// ===== HELPERS =====
+function uid() { return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5); }
+function getInitials(name) { return name.split(' ').map(w => w[0]).join('').toUpperCase().substr(0, 2); }
+function getMember(id) { return team.find(m => m.id === id) || { name: 'Sin asignar', initials: '??', role: '' }; }
+function fmtDate(d) { if (!d) return '—'; const p = d.split('-'); return p[2] + '/' + p[1] + '/' + p[0].substr(2); }
+function today() { const d = new Date(); return d.toISOString().split('T')[0]; }
+function avClass(idx) { return 'av-' + (idx % 8); }
+ 
+function calcProgress(project) {
+  const tasks = project.tasks || [];
+  if (tasks.length === 0) return 0;
+  const done = tasks.filter(t => t.type === 'done').length;
+  return Math.round((done / tasks.length) * 100);
+}
+ 
+function autoStatus(project) {
+  const pct = calcProgress(project);
+  if (pct === 100) return 'done';
+  if (project.status === 'blocked') return 'blocked';
+  if (pct === 0) return 'pending';
+  return 'progress';
+}
+ 
+function statusLabel(s) {
+  const m = { progress: 'En Progreso', pending: 'Pendiente', done: 'Completado', blocked: 'Bloqueado' };
+  return m[s] || s;
+}
+function statusBadge(s) {
+  const m = { progress: 'badge-progress', pending: 'badge-pending', done: 'badge-done', blocked: 'badge-blocked' };
+  return m[s] || 'badge-progress';
+}
+function fillClass(pct) {
+  if (pct === 100) return 'fill-green';
+  if (pct >= 50) return 'fill-blue';
+  if (pct >= 25) return 'fill-amber';
+  return 'fill-red';
+}
+ 
+// ===== RENDER =====
+function renderAll() {
+  renderDate();
+  renderUserSelect();
+  renderKPIs();
+  renderContent();
+  renderTeamForm();
+}
+ 
+function renderDate() {
+  const d = new Date();
+  const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  document.getElementById('currentDate').textContent = d.toLocaleDateString('es-MX', opts);
+}
+ 
+function renderUserSelect() {
+  const sel = document.getElementById('activeUser');
+  const fOwner = document.getElementById('fOwner');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Selecciona tu nombre —</option>';
+  fOwner.innerHTML = '';
+  team.forEach(m => {
+    sel.innerHTML += '<option value="' + m.id + '">' + m.name + '</option>';
+    fOwner.innerHTML += '<option value="' + m.id + '">' + m.name + '</option>';
+  });
+  if (cur) sel.value = cur;
+}
+ 
+function renderKPIs() {
+  const total = projects.length;
+  const done = projects.filter(p => autoStatus(p) === 'done').length;
+  const prog = projects.filter(p => autoStatus(p) === 'progress').length;
+  const pend = projects.filter(p => autoStatus(p) === 'pending').length;
+  const blocked = projects.filter(p => autoStatus(p) === 'blocked').length;
+  const avgPct = total > 0 ? Math.round(projects.reduce((s, p) => s + calcProgress(p), 0) / total) : 0;
+ 
+  document.getElementById('kpiRow').innerHTML =
+    kpiCard('Total Proyectos', total, 'Registrados', '#0f3460') +
+    kpiCard('Completados', done, Math.round(done/Math.max(total,1)*100) + '% del total', '#15803d') +
+    kpiCard('En Progreso', prog, 'Activos', '#1d4ed8') +
+    kpiCard('Pendientes / Bloq.', pend + blocked, 'Requieren atención', '#d97706') +
+    kpiCard('Avance Promedio', avgPct + '%', 'Todos los proyectos', '#7c3aed') +
+    kpiCard('Miembros', team.length, 'Equipo activo', '#0f3460');
+}
+ 
+function kpiCard(label, value, sub, color) {
+  return '<div class="kpi-card"><div class="kpi-label">' + label + '</div><div class="kpi-value" style="color:' + color + '">' + value + '</div><div class="kpi-sub">' + sub + '</div></div>';
+}
+ 
+function renderContent() {
+  const area = document.getElementById('contentArea');
+  if (currentTab === 'team') { renderTeamView(area); return; }
+ 
+  let filtered = projects;
+  if (currentTab === 'progress') filtered = projects.filter(p => autoStatus(p) === 'progress');
+  else if (currentTab === 'pending') filtered = projects.filter(p => autoStatus(p) === 'pending' || autoStatus(p) === 'blocked');
+  else if (currentTab === 'done') filtered = projects.filter(p => autoStatus(p) === 'done');
+ 
+  if (filtered.length === 0) {
+    area.innerHTML = '<div class="empty-state">📭 No hay proyectos en esta categoría.<br>Haz clic en <strong>＋ Nuevo Proyecto</strong> para comenzar.</div>';
+    return;
+  }
+ 
+  area.innerHTML = '<div class="projects-container">' + filtered.map(p => renderProjectCard(p)).join('') + '</div>';
+}
+ 
+function renderProjectCard(p) {
+  const pct = calcProgress(p);
+  const st = autoStatus(p);
+  const owner = getMember(p.owner);
+  const ownerIdx = team.findIndex(m => m.id === p.owner);
+  const activeUser = document.getElementById('activeUser').value;
+  const isOther = activeUser && activeUser !== p.owner;
+ 
+  const doneTasks = (p.tasks || []).filter(t => t.type === 'done');
+  const pendingTasks = (p.tasks || []).filter(t => t.type === 'pending');
+  const nextTasks = (p.tasks || []).filter(t => t.type === 'next');
+ 
+  let contBanner = '';
+  if (isOther && st !== 'done') {
+    contBanner = '<div class="continuation-banner">🤝 Puedes continuar este proyecto de <strong>' + owner.name + '</strong> — marca tareas o agrega nuevas</div>';
+  }
+ 
+  let tasksHtml = contBanner;
+ 
+  if (doneTasks.length > 0) {
+    tasksHtml += '<div class="task-section"><div class="task-title">✅ Completado (' + doneTasks.length + ')</div>';
+    doneTasks.forEach(t => {
+      const by = t.doneBy ? getMember(t.doneBy).initials : '';
+      tasksHtml += '<div class="task-item"><span class="task-dot dot-done"></span><span style="flex:1">' + t.text + '</span>' + (by ? '<span style="font-size:10px;color:#999">' + by + '</span>' : '...
+    });
+    tasksHtml += '</div>';
+  }
+ 
+  if (pendingTasks.length > 0) {
+    tasksHtml += '<div class="task-section"><div class="task-title">⏳ Pendiente (' + pendingTasks.length + ')</div>';
+    pendingTasks.forEach(t => {
+      tasksHtml += '<div class="task-item"><input type="checkbox" class="task-check" onchange="completeTask(\'' + p.id + '\',\'' + t.id + '\')" title="Marcar como completada"><span style="flex:1">'...
+    });
+    tasksHtml += '</div>';
+  }
+ 
+  if (nextTasks.length > 0) {
+    tasksHtml += '<div class="task-section"><div class="task-title">➡️ Siguiente paso (' + nextTasks.length + ')</div>';
+    nextTasks.forEach(t => {
+      tasksHtml += '<div class="task-item"><input type="checkbox" class="task-check" onchange="completeTask(\'' + p.id + '\',\'' + t.id + '\')" title="Marcar como completada"><span style="flex:1">'...
+    });
+    tasksHtml += '</div>';
+  }
+ 
+  if (st !== 'done') {
+    tasksHtml += '<div class="add-task-row">' +
+      '<input type="text" id="newTask_' + p.id + '" placeholder="Nueva tarea...">' +
+      '<select id="newTaskType_' + p.id + '"><option value="pending">Pendiente</option><option value="next">Siguiente</option></select>' +
+      '<button class="add-task-btn" onclick="addTask(\'' + p.id + '\')">＋</button></div>';
+  }
+ 
+  return '<div class="project-card">' +
+    '<div class="card-top"><h3>' + p.name + '</h3><span class="badge ' + statusBadge(st) + '">' + statusLabel(st) + '</span></div>' +
+    '<div class="card-body">' +
+      '<div class="card-meta"><span>📅 ' + fmtDate(p.start) + '</span><span>🎯 ' + fmtDate(p.end) + '</span><span>🔥 ' + (p.priority || 'media') + '</span></div>' +
+      '<div class="progress-row"><span>Avance automático</span><span>' + pct + '%</span></div>' +
+      '<div class="progress-bar"><div class="progress-fill ' + fillClass(pct) + '" style="width:' + pct + '%"></div></div>' +
+      tasksHtml +
+    '</div>' +
+    '<div class="card-footer">' +
+      '<div style="display:flex;align-items:center;gap:6px"><span class="avatar ' + avClass(ownerIdx) + '">' + owner.initials + '</span> ' + owner.name + '</div>' +
+      '<div class="card-actions">' +
+        (st !== 'done' && st !== 'blocked' ? '<button class="btn btn-ghost btn-small" onclick="toggleBlock(\'' + p.id + '\')">🚫 Bloquear</button>' : '') +
+        (st === 'blocked' ? '<button class="btn btn-success btn-small" onclick="unblock(\'' + p.id + '\')">✅ Desbloquear</button>' : '') +
+        '<button class="btn btn-danger btn-small" onclick="deleteProject(\'' + p.id + '\')">🗑</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+ 
+function renderTeamView(area) {
+  let html = '<div class="team-grid">';
+  team.forEach((m, idx) => {
+    const myProjects = projects.filter(p => p.owner === m.id);
+    const active = myProjects.filter(p => autoStatus(p) !== 'done').length;
+    const done = myProjects.filter(p => autoStatus(p) === 'done').length;
+    const avgPct = myProjects.length > 0 ? Math.round(myProjects.reduce((s, p) => s + calcProgress(p), 0) / myProjects.length) : 0;
+ 
+    let projList = '';
+    myProjects.forEach(p => {
+      const pct = calcProgress(p);
+      const st = autoStatus(p);
+      projList += '<li>' + p.name + ' <span class="badge ' + statusBadge(st) + '" style="font-size:9px">' + pct + '%</span></li>';
+    });
+    if (myProjects.length === 0) projList = '<li style="color:#bbb">Sin proyectos asignados</li>';
+ 
+    html += '<div class="team-card">' +
+      '<div class="team-avatar ' + avClass(idx) + '">' + m.initials + '</div>' +
+      '<h4>' + m.name + '</h4><div class="team-role">' + m.role + '</div>' +
+      '<div class="team-stats">' +
+        '<div><div class="t-stat-val" style="color:#0f3460">' + active + '</div><div class="t-stat-lbl">Activos</div></div>' +
+        '<div><div class="t-stat-val" style="color:#15803d">' + done + '</div><div class="t-stat-lbl">Completados</div></div>' +
+        '<div><div class="t-stat-val" style="color:#7c3aed">' + avgPct + '%</div><div class="t-stat-lbl">Avance</div></div>' +
+      '</div>' +
+      '<ul class="team-proj-list">' + projList + '</ul></div>';
+  });
+  html += '</div>';
+  area.innerHTML = html;
+}
+ 
+function renderTeamForm() {
+  const list = document.getElementById('membersList');
+  list.innerHTML = '';
+  team.forEach((m, idx) => {
+    list.innerHTML += '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f0f0f0">' +
+      '<span class="avatar ' + avClass(idx) + '" style="width:24px;height:24px;font-size:9px">' + m.initials + '</span>' +
+      '<span style="flex:1;font-size:13px">' + m.name + '</span>' +
+      '<span style="font-size:11px;color:#888">' + m.role + '</span>' +
+      '<button class="btn btn-danger" onclick="removeMember(\'' + m.id + '\')">✕</button></div>';
+  });
+}
+ 
+// ===== ACTIONS =====
+function addTask(projectId) {
+  const input = document.getElementById('newTask_' + projectId);
+  const typeSelect = document.getElementById('newTaskType_' + projectId);
+  const text = input.value.trim();
+  if (!text) return;
+ 
+  const activeUser = document.getElementById('activeUser').value;
+  const p = projects.find(pr => pr.id === projectId);
+  if (!p) return;
+ 
+  p.tasks.push({ id: uid(), text: text, type: typeSelect.value });
+  p.log = p.log || [];
+  p.log.push({ date: today(), user: activeUser || p.owner, action: 'Tarea agregada: ' + text });
+  saveProjects(projects);
+  renderAll();
+}
+ 
+function completeTask(projectId, taskId) {
+  const activeUser = document.getElementById('activeUser').value;
+  if (!activeUser) { alert('⚠️ Selecciona tu nombre antes de marcar tareas.'); renderAll(); return; }
+ 
+  const p = projects.find(pr => pr.id === projectId);
+  if (!p) return;
+  const t = p.tasks.find(tk => tk.id === taskId);
+  if (!t) return;
+ 
+  t.type = 'done';
+  t.doneBy = activeUser;
+  t.doneDate = today();
+  p.log = p.log || [];
+  p.log.push({ date: today(), user: activeUser, action: 'Tarea completada: ' + t.text });
+ 
+  // Auto-complete project
+  if (calcProgress(p) === 100) {
+    p.status = 'done';
+    p.log.push({ date: today(), user: activeUser, action: 'Proyecto completado automáticamente' });
+  }
+ 
+  saveProjects(projects);
+  renderAll();
+}
+ 
+function toggleBlock(projectId) {
+  const p = projects.find(pr => pr.id === projectId);
+  if (p) { p.status = 'blocked'; saveProjects(projects); renderAll(); }
+}
+ 
+function unblock(projectId) {
+  const p = projects.find(pr => pr.id === projectId);
+  if (p) { p.status = 'progress'; saveProjects(projects); renderAll(); }
+}
+ 
+function deleteProject(projectId) {
+  if (!confirm('¿Estás seguro de eliminar este proyecto?')) return;
+  projects = projects.filter(p => p.id !== projectId);
+  saveProjects(projects);
+  renderAll();
+}
+ 
+function removeMember(memberId) {
+  if (!confirm('¿Eliminar este miembro del equipo?')) return;
+  team = team.filter(m => m.id !== memberId);
+  saveTeam(team);
+  renderAll();
+}
+ 
+// ===== EVENT LISTENERS =====
+document.getElementById('btnNewProject').addEventListener('click', function() {
+  document.getElementById('projectForm').classList.toggle('visible');
+  document.getElementById('teamForm').classList.remove('visible');
+});
+ 
+document.getElementById('btnCancelForm').addEventListener('click', function() {
+  document.getElementById('projectForm').classList.remove('visible');
+});
+ 
+document.getElementById('btnSaveProject').addEventListener('click', function() {
+  const name = document.getElementById('fName').value.trim();
+  if (!name) { alert('⚠️ Escribe el nombre del proyecto.'); return; }
+ 
+  const activeUser = document.getElementById('activeUser').value;
+  const newP = {
+    id: uid(),
+    name: name,
+    owner: document.getElementById('fOwner').value,
+    start: document.getElementById('fStart').value || today(),
+    end: document.getElementById('fEnd').value || '',
+    status: document.getElementById('fStatus').value,
+    priority: document.getElementById('fPriority').value,
+    desc: document.getElementById('fDesc').value,
+    tasks: [],
+    log: [{ date: today(), user: activeUser || document.getElementById('fOwner').value, action: 'Proyecto creado' }]
+  };
+ 
+  projects.push(newP);
+  saveProjects(projects);
+  document.getElementById('projectForm').classList.remove('visible');
+  document.getElementById('fName').value = '';
+  document.getElementById('fDesc').value = '';
+  renderAll();
+});
+ 
+document.getElementById('btnManageTeam').addEventListener('click', function() {
+  document.getElementById('teamForm').classList.toggle('visible');
+  document.getElementById('projectForm').classList.remove('visible');
+});
+ 
+document.getElementById('btnCloseTeam').addEventListener('click', function() {
+  document.getElementById('teamForm').classList.remove('visible');
+});
+ 
+document.getElementById('btnAddMember').addEventListener('click', function() {
+  const name = document.getElementById('newMemberName').value.trim();
+  const role = document.getElementById('newMemberRole').value.trim() || 'Learning Trainer';
+  if (!name) { alert('⚠️ Escribe el nombre del miembro.'); return; }
+ 
+  team.push({ id: uid(), name: name, role: role, initials: getInitials(name) });
+  saveTeam(team);
+  document.getElementById('newMemberName').value = '';
+  document.getElementById('newMemberRole').value = '';
+  renderAll();
+});
+ 
+document.getElementById('activeUser').addEventListener('change', function() { renderContent(); });
+ 
+// Tabs
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    currentTab = this.dataset.tab;
+    renderContent();
+  });
+});
+ 
+// ===== INIT =====
+renderAll();
+</script>
+ 
+</body>
+</html>
